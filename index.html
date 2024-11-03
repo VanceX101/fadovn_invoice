@@ -4,23 +4,33 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Danh Sách Hóa Đơn</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
     body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
-    .invoice-list { max-width: 800px; margin: auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    .invoice-list { max-width: 900px; margin: 20px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
     h1 { text-align: center; }
-    .search-bar { margin-bottom: 20px; width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #ccc; }
+    .search-container { display: flex; align-items: center; margin-bottom: 20px; }
+    .search-bar { flex: 1; padding: 10px; border-radius: 4px; border: 1px solid #ccc; margin-right: 10px; }
     .summary { display: flex; justify-content: space-between; margin-bottom: 20px; padding: 10px; background: #e9e9e9; border-radius: 4px; }
     .invoice-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #ddd; }
     .invoice-item:last-child { border-bottom: none; }
     .invoice-item a { text-decoration: none; color: #333; }
     .button { margin-left: 10px; padding: 5px 10px; border: none; border-radius: 4px; background-color: #007BFF; color: white; cursor: pointer; }
     .button:hover { background-color: #0056b3; }
+    .icon { margin-left: 10px; cursor: pointer; }
+    .icon:hover { color: #007BFF; }
   </style>
 </head>
 <body>
   <div class="invoice-list">
     <h1>Danh Sách Hóa Đơn</h1>
-    <input type="text" id="searchInput" placeholder="Tìm kiếm hóa đơn..." class="search-bar" onkeyup="searchInvoices()">
+    
+    <div class="search-container">
+      <input type="text" id="searchInput" placeholder="Tìm kiếm hóa đơn..." class="search-bar" onkeyup="searchInvoices()">
+      <button class="icon" onclick="searchInvoices()">
+        <i class="fas fa-search"></i>
+      </button>
+    </div>
     
     <div class="summary">
       <div><strong>Tổng Hóa Đơn:</strong> <span id="totalInvoices">0</span></div>
@@ -63,6 +73,9 @@
           <div>
             <button class="button" onclick="editInvoice('${invoice}')">Chỉnh Sửa</button>
             <button class="button" onclick="deleteInvoice('${invoice}')">Xóa</button>
+            <a href="./invoices/${invoice}" target="_blank" class="icon" title="Xem hóa đơn">
+              <i class="fas fa-eye"></i>
+            </a>
           </div>
         </div>
       `).join('');
@@ -91,6 +104,9 @@
           <div>
             <button class="button" onclick="editInvoice('${invoice}')">Chỉnh Sửa</button>
             <button class="button" onclick="deleteInvoice('${invoice}')">Xóa</button>
+            <a href="./invoices/${invoice}" target="_blank" class="icon" title="Xem hóa đơn">
+              <i class="fas fa-eye"></i>
+            </a>
           </div>
         </div>
       `).join('');
