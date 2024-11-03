@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice List</title>
+  <style>
+    /* CSS cơ bản để làm đẹp */
+    body { font-family: Arial, sans-serif; }
+    .invoice-list { max-width: 600px; margin: auto; padding: 20px; }
+    .search-bar { margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <div class="invoice-list">
+    <h1>Danh Sách Hóa Đơn</h1>
+    <input type="text" id="searchInput" placeholder="Tìm kiếm hóa đơn..." class="search-bar" onkeyup="searchInvoices()">
+
+    <ul id="invoiceList">
+      <!-- JavaScript sẽ chèn các hóa đơn vào đây -->
+    </ul>
+  </div>
+
+  <script>
+    const invoiceListElement = document.getElementById('invoiceList');
+
+    // Thêm danh sách hóa đơn - ví dụ cứng, bạn có thể thay bằng dữ liệu động nếu muốn
+    const invoices = [
+      "invoice_001.html",
+      "invoice_002.html",
+      "invoice_003.html"
+    ];
+
+    // Hiển thị danh sách hóa đơn
+    function displayInvoices() {
+      invoiceListElement.innerHTML = invoices.map(invoice => `
+        <li><a href="./view.html?invoice=${invoice}" target="_blank">${invoice}</a></li>
+      `).join('');
+    }
+
+    // Hàm tìm kiếm
+    function searchInvoices() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      const filteredInvoices = invoices.filter(invoice => invoice.toLowerCase().includes(query));
+      invoiceListElement.innerHTML = filteredInvoices.map(invoice => `
+        <li><a href="./view.html?invoice=${invoice}" target="_blank">${invoice}</a></li>
+      `).join('');
+    }
+
+    displayInvoices();
+  </script>
+</body>
+</html>
