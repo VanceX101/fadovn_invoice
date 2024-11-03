@@ -3,26 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Invoice Details</title>
+  <title>Chi Tiết Hóa Đơn</title>
 </head>
 <body>
   <div id="invoiceContent">
-    <!-- Nội dung hóa đơn sẽ được nhúng tại đây -->
+    <!-- Nội dung hóa đơn sẽ được chèn vào đây -->
   </div>
 
   <script>
-    // Lấy tên hóa đơn từ URL (ví dụ: ?invoice=invoice_001.html)
+    // Lấy tên hóa đơn từ URL
     const urlParams = new URLSearchParams(window.location.search);
     const invoiceFile = urlParams.get('invoice');
 
     if (invoiceFile) {
       fetch(`./invoices/${invoiceFile}`)
-        .then(response => response.text())
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Không thể tải hóa đơn.');
+          }
+          return response.text();
+        })
         .then(html => {
           document.getElementById('invoiceContent').innerHTML = html;
         })
         .catch(error => {
-          document.getElementById('invoiceContent').innerText = "Không thể tải hóa đơn.";
+          document.getElementById('invoiceContent').innerText = error.message;
         });
     } else {
       document.getElementById('invoiceContent').innerText = "Hóa đơn không tồn tại.";
