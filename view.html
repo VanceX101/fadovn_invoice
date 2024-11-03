@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice Details</title>
+</head>
+<body>
+  <div id="invoiceContent">
+    <!-- Nội dung hóa đơn sẽ được nhúng tại đây -->
+  </div>
+
+  <script>
+    // Lấy tên hóa đơn từ URL (ví dụ: ?invoice=invoice_001.html)
+    const urlParams = new URLSearchParams(window.location.search);
+    const invoiceFile = urlParams.get('invoice');
+
+    if (invoiceFile) {
+      fetch(`./invoices/${invoiceFile}`)
+        .then(response => response.text())
+        .then(html => {
+          document.getElementById('invoiceContent').innerHTML = html;
+        })
+        .catch(error => {
+          document.getElementById('invoiceContent').innerText = "Không thể tải hóa đơn.";
+        });
+    } else {
+      document.getElementById('invoiceContent').innerText = "Hóa đơn không tồn tại.";
+    }
+  </script>
+</body>
+</html>
