@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Invoice List</title>
   <style>
-    /* CSS cơ bản để làm đẹp */
     body { font-family: Arial, sans-serif; }
     .invoice-list { max-width: 600px; margin: auto; padding: 20px; }
     .search-bar { margin-bottom: 20px; }
@@ -15,21 +14,28 @@
   <div class="invoice-list">
     <h1>Danh Sách Hóa Đơn</h1>
     <input type="text" id="searchInput" placeholder="Tìm kiếm hóa đơn..." class="search-bar" onkeyup="searchInvoices()">
-
-    <ul id="invoiceList">
-      <!-- JavaScript sẽ chèn các hóa đơn vào đây -->
-    </ul>
+    <ul id="invoiceList"></ul>
   </div>
 
   <script>
     const invoiceListElement = document.getElementById('invoiceList');
+    const invoices = [];
 
-    // Thêm danh sách hóa đơn - ví dụ cứng, bạn có thể thay bằng dữ liệu động nếu muốn
-    const invoices = [
-      "invoice_001.html",
-      "invoice_002.html",
-      "invoice_003.html"
-    ];
+    // Lấy danh sách hóa đơn từ thư mục invoices
+    async function fetchInvoices() {
+      const response = await fetch('https://api.github.com/repos/VanceX101/fado_invoice/contents/invoices', {
+        headers: {
+          'Authorization': 'token <your_access_token>'
+        }
+      });
+      const data = await response.json();
+      data.forEach(file => {
+        if (file.name.endsWith('.html')) {
+          invoices.push(file.name);
+        }
+      });
+      displayInvoices();
+    }
 
     // Hiển thị danh sách hóa đơn
     function displayInvoices() {
@@ -47,7 +53,8 @@
       `).join('');
     }
 
-    displayInvoices();
+    // Gọi hàm để lấy hóa đơn khi trang được tải
+    fetchInvoices();
   </script>
 </body>
 </html>
