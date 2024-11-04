@@ -3,133 +3,114 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Danh Sách Hóa Đơn</title>
+  <title>Trang Quản Lý Hóa Đơn</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
     body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
-    .invoice-list { max-width: 900px; margin: 20px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    .container { max-width: 1200px; margin: 20px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
     h1 { text-align: center; }
-    .search-container { display: flex; align-items: center; margin-bottom: 20px; }
-    .search-bar { flex: 1; padding: 10px; border-radius: 4px; border: 1px solid #ccc; margin-right: 10px; }
-    .summary { display: flex; justify-content: space-between; margin-bottom: 20px; padding: 10px; background: #e9e9e9; border-radius: 4px; }
-    .invoice-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #ddd; }
-    .invoice-item:last-child { border-bottom: none; }
-    .invoice-item a { text-decoration: none; color: #333; }
-    .button { margin-left: 10px; padding: 5px 10px; border: none; border-radius: 4px; background-color: #007BFF; color: white; cursor: pointer; }
+    .section { margin-bottom: 40px; }
+    .section-title { font-size: 1.5em; margin-bottom: 10px; color: #007BFF; }
+    .button { padding: 5px 10px; border: none; border-radius: 4px; background-color: #007BFF; color: white; cursor: pointer; }
     .button:hover { background-color: #0056b3; }
     .icon { margin-left: 10px; cursor: pointer; }
     .icon:hover { color: #007BFF; }
+    .table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .table th, .table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    .table th { background-color: #f2f2f2; }
   </style>
 </head>
 <body>
-  <div class="invoice-list">
-    <h1>Danh Sách Hóa Đơn</h1>
-    
-    <div class="search-container">
-      <input type="text" id="searchInput" placeholder="Tìm kiếm hóa đơn..." class="search-bar" onkeyup="searchInvoices()">
-      <button class="icon" onclick="searchInvoices()">
-        <i class="fas fa-search"></i>
-      </button>
-    </div>
-    
-    <div class="summary">
-      <div><strong>Tổng Hóa Đơn:</strong> <span id="totalInvoices">0</span></div>
-      <div><strong>Tổng Tiền:</strong> <span id="totalAmount">0</span> VNĐ</div>
-      <div><strong>Đã Thanh Toán:</strong> <span id="paidInvoices">0</span></div>
-      <div><strong>Chưa Thanh Toán:</strong> <span id="unpaidInvoices">0</span></div>
-    </div>
+  <div class="container">
+    <h1>Trang Quản Lý Hóa Đơn</h1>
 
-    <div id="invoiceList"></div>
+    <!-- Quản lý hóa đơn -->
+    <section class="section" id="invoice-management">
+      <h2 class="section-title">Quản Lý Hóa Đơn</h2>
+      <div id="invoiceList"></div>
+    </section>
+
+    <!-- Quản lý thông tin hóa đơn -->
+    <section class="section" id="invoice-info-management">
+      <h2 class="section-title">Quản Lý Thông Tin Hóa Đơn</h2>
+      <table class="table" id="invoiceInfoTable">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Tên</th>
+            <th>Số tiền</th>
+            <th>Ngày</th>
+            <th>Hành động</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <!-- Quản lý thông tin tạo hóa đơn -->
+    <section class="section" id="create-invoice-management">
+      <h2 class="section-title">Quản Lý Thông Tin Tạo Hóa Đơn</h2>
+      <div id="createInvoiceList"></div>
+    </section>
+
+    <!-- Quản lý airway bill -->
+    <section class="section" id="airway-bill-management">
+      <h2 class="section-title">Quản Lý Airway Bill</h2>
+      <div id="airwayBillList"></div>
+    </section>
   </div>
 
   <script>
-    const invoiceListElement = document.getElementById('invoiceList');
-    const invoices = [];
+    // Lấy dữ liệu từ Google Sheets qua API
+    async function fetchGoogleSheet(sheetId, sheetName) {
+      const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}!A1:D100?key=YOUR_API_KEY`);
+      if (!response.ok) throw new Error('Failed to fetch data');
+      const data = await response.json();
+      return data.values;
+    }
 
-    // Lấy danh sách hóa đơn từ thư mục invoices
+    // Quản lý hóa đơn
     async function fetchInvoices() {
       const response = await fetch('https://api.github.com/repos/VanceX101/fadovn_invoice/contents/invoices');
-
-      if (!response.ok) {
-        console.error('Lỗi khi tải danh sách hóa đơn:', response.status);
-        return;
-      }
-
       const data = await response.json();
-      data.forEach(file => {
-        if (file.name.endsWith('.html')) {  // Kiểm tra nếu file có đuôi .html
-          invoices.push(file.name);
-        }
-      });
-      displayInvoices();
-      updateSummary();
-    }
-
-    // Hiển thị danh sách hóa đơn
-    function displayInvoices() {
-      invoiceListElement.innerHTML = invoices.map(invoice => `
-        <div class="invoice-item">
-          <a href="./invoices/${invoice}" target="_blank">${invoice}</a>
-          <div>
-            <button class="button" onclick="editInvoice('${invoice}')">Chỉnh Sửa</button>
-            <button class="button" onclick="deleteInvoice('${invoice}')">Xóa</button>
-            <a href="./invoices/${invoice}" target="_blank" class="icon" title="Xem hóa đơn">
-              <i class="fas fa-eye"></i>
-            </a>
-          </div>
+      const invoiceListElement = document.getElementById('invoiceList');
+      invoiceListElement.innerHTML = data.map(file => `
+        <div>
+          <a href="./invoices/${file.name}" target="_blank">${file.name}</a>
+          <button class="button" onclick="editInvoice('${file.name}')">Chỉnh Sửa</button>
+          <button class="button" onclick="deleteInvoice('${file.name}')">Xóa</button>
         </div>
       `).join('');
     }
 
-    // Cập nhật thông tin tổng quan hóa đơn
-    function updateSummary() {
-      const total = invoices.length;
-      const totalAmount = total * 100000; // Giả sử mỗi hóa đơn có giá trị cố định
-      const paid = Math.floor(total * 0.6); // Giả sử 60% hóa đơn đã thanh toán
-      const unpaid = total - paid;
-
-      document.getElementById('totalInvoices').textContent = total;
-      document.getElementById('totalAmount').textContent = totalAmount;
-      document.getElementById('paidInvoices').textContent = paid;
-      document.getElementById('unpaidInvoices').textContent = unpaid;
-    }
-
-    // Hàm tìm kiếm
-    function searchInvoices() {
-      const query = document.getElementById('searchInput').value.toLowerCase();
-      const filteredInvoices = invoices.filter(invoice => invoice.toLowerCase().includes(query));
-      invoiceListElement.innerHTML = filteredInvoices.map(invoice => `
-        <div class="invoice-item">
-          <a href="./invoices/${invoice}" target="_blank">${invoice}</a>
-          <div>
-            <button class="button" onclick="editInvoice('${invoice}')">Chỉnh Sửa</button>
-            <button class="button" onclick="deleteInvoice('${invoice}')">Xóa</button>
-            <a href="./invoices/${invoice}" target="_blank" class="icon" title="Xem hóa đơn">
-              <i class="fas fa-eye"></i>
-            </a>
-          </div>
-        </div>
+    // Quản lý thông tin hóa đơn
+    async function fetchInvoiceInfo() {
+      const invoiceInfo = await fetchGoogleSheet('1YU0dO3F4YN7-iCvLuDNnUDVN6YiNmnI48WPkqwOYXgU', 'invoiceItemInfo');
+      const tableBody = document.querySelector('#invoiceInfoTable tbody');
+      tableBody.innerHTML = invoiceInfo.slice(1).map(row => `
+        <tr>
+          <td>${row[0]}</td>
+          <td>${row[1]}</td>
+          <td>${row[2]}</td>
+          <td>${row[3]}</td>
+          <td>
+            <button onclick="editInvoiceInfo('${row[0]}')">Edit</button>
+            <button onclick="cancelInvoiceInfo('${row[0]}')">Cancel</button>
+          </td>
+        </tr>
       `).join('');
     }
 
-    // Hàm chỉnh sửa hóa đơn
-    function editInvoice(invoice) {
-      alert(`Chỉnh sửa hóa đơn: ${invoice}`);
-      // Thêm logic chỉnh sửa hóa đơn ở đây
-    }
+    // Các hàm bổ trợ
+    function editInvoiceInfo(id) { alert(`Editing invoice info ${id}`); }
+    function cancelInvoiceInfo(id) { alert(`Cancelling invoice info ${id}`); }
+    function editInvoice(name) { alert(`Editing invoice ${name}`); }
+    function deleteInvoice(name) { alert(`Deleting invoice ${name}`); }
 
-    // Hàm xóa hóa đơn
-    function deleteInvoice(invoice) {
-      const confirmation = confirm(`Bạn có chắc chắn muốn xóa hóa đơn: ${invoice}?`);
-      if (confirmation) {
-        alert(`Hóa đơn ${invoice} đã được xóa.`);
-        // Thêm logic xóa hóa đơn ở đây
-        fetchInvoices(); // Tải lại danh sách hóa đơn
-      }
-    }
-
-    // Gọi hàm để lấy hóa đơn khi trang được tải
+    // Tải dữ liệu khi trang load
     fetchInvoices();
+    fetchInvoiceInfo();
+    // Bạn sẽ thêm chức năng cho các phần quản lý khác theo cách tương tự
   </script>
 </body>
 </html>
